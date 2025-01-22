@@ -39,6 +39,8 @@ Spectrum eval_op::operator()(const DisneyDiffuse &bsdf) const {
 	// Compute the final result
 	Spectrum f_diffuse = (1 - subsurface) * f_base_diffuse + subsurface * f_subsurface;
     return f_diffuse;
+    // return f_base_diffuse;
+    // return f_subsurface;
     // return make_zero_spectrum();
 }
 
