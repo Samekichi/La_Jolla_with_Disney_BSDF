@@ -1,6 +1,7 @@
-# lajolla
-UCSD CSE 272 renderer
+# LaJolla
+This is the forked version of UCSD CSE 272 renderer **La Jolla**, mainly for recording personal homework progress.
 
+----
 # Build
 All the dependencies are included. Use CMake to build.
 If you are on Unix systems, try
