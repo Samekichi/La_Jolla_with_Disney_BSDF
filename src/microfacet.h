@@ -62,6 +62,16 @@ inline Real GTR2(Real n_dot_h, Real roughness) {
     return a2 / (c_PI * t*t);
 }
 
+// GGX for Disney BSDF
+inline Real GTR2(Vector3 h_local, Real roughness, Real anisotropic) {
+    Real aspect = sqrt(1 - 0.9 * anisotropic);
+    Real alpha_min = 0.0001;
+    Real alpha_x = max(alpha_min, pow(roughness, 2) / aspect);
+    Real alpha_y = max(alpha_min, pow(roughness, 2) * aspect);
+    Real dist_metric = pow(h_local.x, 2) / pow(alpha_x, 2) + pow(h_local.y, 2) / pow(alpha_y, 2) + pow(h_local.z, 2);
+    return 1 / (c_PI * alpha_x * alpha_y * pow(dist_metric, 2));  // D_m
+}
+
 inline Real GGX(Real n_dot_h, Real roughness) {
     return GTR2(n_dot_h, roughness);
 }
@@ -78,6 +88,19 @@ inline Real smith_masking_gtr2(const Vector3 &v_local, Real roughness) {
     Vector3 v2 = v_local * v_local;
     Real Lambda = (-1 + sqrt(1 + (v2.x * a2 + v2.y * a2) / v2.z)) / 2;
     return 1 / (1 + Lambda);
+}
+
+inline Real smith_masking_gtr2(const Vector3& v_local, Real roughness, Real anisotropic) {
+    Real aspect = sqrt(1 - 0.9 * anisotropic);
+    Real alpha_min = 0.0001;
+    Real alpha_x = max(alpha_min, pow(roughness, 2) / aspect);
+    Real alpha_y = max(alpha_min, pow(roughness, 2) * aspect);
+    Real gamma = (
+                    sqrt(
+                        1 + (alpha_x * pow(v_local.x, 2) + alpha_y * pow(v_local.y, 2)) / (pow(v_local.z, 2))
+                    ) - 1
+                 ) / 2;
+	return 1 / (1 + gamma);
 }
 
 /// See "Sampling the GGX Distribution of Visible Normals", Heitz, 2018.
@@ -111,4 +134,35 @@ inline Vector3 sample_visible_normals(const Vector3 &local_dir_in, Real alpha, c
 
     // Transforming the normal back to the ellipsoid configuration
     return normalize(Vector3{alpha * hemi_N.x, alpha * hemi_N.y, max(Real(0), hemi_N.z)});
+}
+
+inline Vector3 sample_visible_normals(const Vector3& local_dir_in, Real alpha_x, Real alpha_y, const Vector2& rnd_param) {
+    // The incoming direction is in the "ellipsodial configuration" in Heitz's paper
+    if (local_dir_in.z < 0) {
+        // Ensure the input is on top of the surface.
+        return -sample_visible_normals(-local_dir_in, alpha_x, alpha_y, rnd_param);
+    }
+
+    // Transform the incoming direction to the "hemisphere configuration".
+    Vector3 hemi_dir_in = normalize(
+        Vector3{ alpha_x * local_dir_in.x, alpha_y * local_dir_in.y, local_dir_in.z });
+
+    // Parameterization of the projected area of a hemisphere.
+    // First, sample a disk.
+    Real r = sqrt(rnd_param.x);
+    Real phi = 2 * c_PI * rnd_param.y;
+    Real t1 = r * cos(phi);
+    Real t2 = r * sin(phi);
+    // Vertically scale the position of a sample to account for the projection.
+    Real s = (1 + hemi_dir_in.z) / 2;
+    t2 = (1 - s) * sqrt(1 - t1 * t1) + s * t2;
+    // Point in the disk space
+    Vector3 disk_N{ t1, t2, sqrt(max(Real(0), 1 - t1 * t1 - t2 * t2)) };
+
+    // Reprojection onto hemisphere -- we get our sampled normal in hemisphere space.
+    Frame hemi_frame(hemi_dir_in);
+    Vector3 hemi_N = to_world(hemi_frame, disk_N);
+
+    // Transforming the normal back to the ellipsoid configuration
+    return normalize(Vector3{ alpha_x * hemi_N.x, alpha_y * hemi_N.y, max(Real(0), hemi_N.z) });
 }
