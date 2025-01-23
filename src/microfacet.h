@@ -66,10 +66,10 @@ inline Real GTR2(Real n_dot_h, Real roughness) {
 inline Real GTR2(Vector3 h_local, Real roughness, Real anisotropic) {
     Real aspect = sqrt(1 - 0.9 * anisotropic);
     Real alpha_min = 0.0001;
-    Real alpha_x = max(alpha_min, pow(roughness, 2) / aspect);
-    Real alpha_y = max(alpha_min, pow(roughness, 2) * aspect);
-    Real dist_metric = pow(h_local.x, 2) / pow(alpha_x, 2) + pow(h_local.y, 2) / pow(alpha_y, 2) + pow(h_local.z, 2);
-    return 1 / (c_PI * alpha_x * alpha_y * pow(dist_metric, 2));  // D_m
+    Real alpha_x = max(alpha_min, (roughness * roughness) / aspect);
+    Real alpha_y = max(alpha_min, (roughness * roughness) * aspect);
+    Real dist_metric = (h_local.x * h_local.x) / (alpha_x * alpha_x) + (h_local.y * h_local.y) / (alpha_y * alpha_y) + (h_local.z * h_local.z);
+    return 1 / (c_PI * alpha_x * alpha_y * (dist_metric * dist_metric));  // D_m
 }
 
 inline Real GGX(Real n_dot_h, Real roughness) {
@@ -93,11 +93,11 @@ inline Real smith_masking_gtr2(const Vector3 &v_local, Real roughness) {
 inline Real smith_masking_gtr2(const Vector3& v_local, Real roughness, Real anisotropic) {
     Real aspect = sqrt(1 - 0.9 * anisotropic);
     Real alpha_min = 0.0001;
-    Real alpha_x = max(alpha_min, pow(roughness, 2) / aspect);
-    Real alpha_y = max(alpha_min, pow(roughness, 2) * aspect);
+    Real alpha_x = max(alpha_min, (roughness * roughness) / aspect);
+    Real alpha_y = max(alpha_min, (roughness * roughness) * aspect);
     Real Lambda = (
                     sqrt(
-                        1 + (alpha_x * pow(v_local.x, 2) + alpha_y * pow(v_local.y, 2)) / (pow(v_local.z, 2))
+                        1 + (alpha_x * (v_local.x * v_local.x) + alpha_y * (v_local.y * v_local.y)) / (v_local.z * v_local.z)
                     ) - 1
                  ) / 2;
 	return 1 / (1 + Lambda);

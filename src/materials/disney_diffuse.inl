@@ -24,7 +24,7 @@ Spectrum eval_op::operator()(const DisneyDiffuse &bsdf) const {
     Real n_dot_out = dot(frame.n, dir_out);  // cos(theta_out)
 	Real h_dot_out = dot(h, dir_out);  // cos(theta_half_out)
     // 1. f_base_diffuse
-    Real FD_90 = 0.5 + 2 * roughness * pow(h_dot_out, 2);
+    Real FD_90 = 0.5 + 2 * roughness * h_dot_out * h_dot_out;
     Real FD_in = 1 + (FD_90 - 1) * pow(1 - n_dot_in, 5);
     Real FD_out = 1 + (FD_90 - 1) * pow(1 - n_dot_out, 5);
     Spectrum f_base_diffuse = (base_color / c_PI) * (FD_in * FD_out * abs(n_dot_out));

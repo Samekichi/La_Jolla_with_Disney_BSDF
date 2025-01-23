@@ -26,7 +26,6 @@ Spectrum eval_op::operator()(const DisneyMetal &bsdf) const {
 	Real h_dot_out = dot(h, dir_out);  // cos(theta_half_out)
     // 1. F_m
 	Spectrum F_m = schlick_fresnel(base_color, h_dot_out);
-    //Spectrum F_m = base_color + (1 - base_color) * pow(1 - h_dot_out, 5);
     // 2. D_m
 	Real D_m = GTR2(h_local, roughness, anisotropic);
     // 3. G_m
@@ -94,8 +93,8 @@ std::optional<BSDFSampleRecord>
     
     Real aspect = sqrt(1 - 0.9 * anisotropic);
     Real alpha_min = 0.0001;
-    Real alpha_x = max(alpha_min, pow(roughness, 2) / aspect);
-    Real alpha_y = max(alpha_min, pow(roughness, 2) * aspect);
+    Real alpha_x = max(alpha_min, (roughness * roughness) / aspect);
+    Real alpha_y = max(alpha_min, (roughness * roughness) * aspect);
     Vector3 local_micro_normal =
         sample_visible_normals(local_dir_in, alpha_x, alpha_y, rnd_param_uv);
 
