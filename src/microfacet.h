@@ -95,12 +95,12 @@ inline Real smith_masking_gtr2(const Vector3& v_local, Real roughness, Real anis
     Real alpha_min = 0.0001;
     Real alpha_x = max(alpha_min, pow(roughness, 2) / aspect);
     Real alpha_y = max(alpha_min, pow(roughness, 2) * aspect);
-    Real gamma = (
+    Real Lambda = (
                     sqrt(
                         1 + (alpha_x * pow(v_local.x, 2) + alpha_y * pow(v_local.y, 2)) / (pow(v_local.z, 2))
                     ) - 1
                  ) / 2;
-	return 1 / (1 + gamma);
+	return 1 / (1 + Lambda);
 }
 
 /// See "Sampling the GGX Distribution of Visible Normals", Heitz, 2018.

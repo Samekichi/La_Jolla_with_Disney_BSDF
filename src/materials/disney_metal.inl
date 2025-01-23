@@ -29,12 +29,6 @@ Spectrum eval_op::operator()(const DisneyMetal &bsdf) const {
     //Spectrum F_m = base_color + (1 - base_color) * pow(1 - h_dot_out, 5);
     // 2. D_m
 	Real D_m = GTR2(h_local, roughness, anisotropic);
-    /*Real aspect = sqrt(1 - 0.9 * anisotropic);
-    Real alpha_min = 0.0001;
-    Real alpha_x = max(alpha_min, pow(roughness, 2) / aspect);
-    Real alpha_y = max(alpha_min, pow(roughness, 2) * aspect);
-	Real dist_metric = pow(h_local.x, 2) / pow(alpha_x, 2) + pow(h_local.y, 2) / pow(alpha_y, 2) + pow(h_local.z, 2);
-    Real D_m = 1 / (c_PI * alpha_x * alpha_y * pow(dist_metric, 2));*/
     // 3. G_m
 	Real G_m = smith_masking_gtr2(to_local(frame, dir_in), roughness, anisotropic) *
                smith_masking_gtr2(to_local(frame, dir_out), roughness, anisotropic);
@@ -70,10 +64,10 @@ Real pdf_sample_bsdf_op::operator()(const DisneyMetal &bsdf) const {
     // "Sampling the GGX Distribution of Visible Normals"
     // https://jcgt.org/published/0007/04/01/
     // this importance samples smith_masking(cos_theta_in) * GTR2(cos_theta_h, roughness) * cos_theta_out
-    Real G = smith_masking_gtr2(to_local(frame, dir_in), roughness, anisotropic);
-    Real D = GTR2(h_local, roughness, anisotropic);
+    Real G_m = smith_masking_gtr2(to_local(frame, dir_in), roughness, anisotropic);
+    Real D_m = GTR2(h_local, roughness, anisotropic);
     // (4 * cos_theta_v) is the Jacobian of the reflectiokn
-    return (G * D) / (4 * n_dot_in);
+    return (G_m * D_m) / (4 * n_dot_in);
     // return 0;
 }
 
