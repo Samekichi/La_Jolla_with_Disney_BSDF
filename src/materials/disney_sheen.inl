@@ -16,7 +16,8 @@ Spectrum eval_op::operator()(const DisneySheen &bsdf) const {
     // Evaluate key parameters for DisneySheen
     Spectrum base_color = eval(bsdf.base_color, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real sheen_tint = eval(bsdf.sheen_tint, vertex.uv, vertex.uv_screen_size, texture_pool);
-    
+	sheen_tint = std::clamp(sheen_tint, Real(0.01), Real(1));
+
     // Compute DisneySheen's subcomponents
     // 0. common vars
     Vector3 h = normalize(dir_in + dir_out);

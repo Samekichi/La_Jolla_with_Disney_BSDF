@@ -17,6 +17,8 @@ Spectrum eval_op::operator()(const DisneyMetal &bsdf) const {
     Spectrum base_color = eval(bsdf.base_color, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real roughness = eval(bsdf.roughness, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real anisotropic = eval(bsdf.anisotropic, vertex.uv, vertex.uv_screen_size, texture_pool);
+    roughness = std::clamp(roughness, Real(0.01), Real(1));
+    anisotropic = std::clamp(anisotropic, Real(0.01), Real(1));
 
 	// Compute DisneyMetal's subcomponents
 	// 0. common vars

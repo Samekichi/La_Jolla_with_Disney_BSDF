@@ -15,6 +15,7 @@ Spectrum eval_op::operator()(const DisneyClearcoat &bsdf) const {
     
 	// Evaluate key parameters for DisneyClearcoat
     Real clearcoat_gloss = eval(bsdf.clearcoat_gloss, vertex.uv, vertex.uv_screen_size, texture_pool);
+	clearcoat_gloss = std::clamp(clearcoat_gloss, Real(0.01), Real(1));
 
 	// Compute DisneyClearcoat's subcomponents
 	// 0. common vars

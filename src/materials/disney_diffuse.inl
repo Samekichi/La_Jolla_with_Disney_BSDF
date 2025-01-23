@@ -16,7 +16,9 @@ Spectrum eval_op::operator()(const DisneyDiffuse &bsdf) const {
     Spectrum base_color = eval(bsdf.base_color, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real roughness = eval(bsdf.roughness, vertex.uv, vertex.uv_screen_size, texture_pool);
 	Real subsurface = eval(bsdf.subsurface, vertex.uv, vertex.uv_screen_size, texture_pool);
-    
+    roughness = std::clamp(roughness, Real(0.01), Real(1));
+    subsurface = std::clamp(subsurface, Real(0.01), Real(1));
+
     // Compute DisneyDiffuse's subcomponents
     // 0. common vars
     Vector3 h = normalize(dir_in + dir_out);
