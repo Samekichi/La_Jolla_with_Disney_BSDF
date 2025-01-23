@@ -57,8 +57,9 @@ Real pdf_sample_bsdf_op::operator()(const DisneyMetal &bsdf) const {
     Real roughness = eval(bsdf.roughness, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real anisotropic = eval(bsdf.anisotropic, vertex.uv, vertex.uv_screen_size, texture_pool);
     
-    // Clamp roughness to avoid numerical issues.
+    // Clamp to avoid numerical issues.
     roughness = std::clamp(roughness, Real(0.01), Real(1));
+    anisotropic = std::clamp(anisotropic, Real(0.01), Real(1));
     // For metal, we use the ellipsoidal sampling from Heitz 2018
     // "Sampling the GGX Distribution of Visible Normals"
     // https://jcgt.org/published/0007/04/01/
