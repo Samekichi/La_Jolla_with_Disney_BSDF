@@ -90,6 +90,12 @@ inline Real smith_masking_gtr2(const Vector3 &v_local, Real roughness) {
     return 1 / (1 + Lambda);
 }
 
+inline Real smith_masking_gtr2_precise(const Vector3& v_local, Real alpha) {
+    Real Lambda = (-1 + sqrt(1 + ((v_local.x * alpha) * (v_local.x * alpha) + (v_local.y * alpha) * (v_local.y * alpha)) / (v_local.z * v_local.z))) / 2;
+    return 1 / (1 + Lambda);
+}
+
+
 inline Real smith_masking_gtr2(const Vector3& v_local, Real roughness, Real anisotropic) {
     Real aspect = sqrt(1 - 0.9 * anisotropic);
     Real alpha_min = 0.0001;
