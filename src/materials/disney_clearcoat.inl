@@ -29,11 +29,11 @@ Spectrum eval_op::operator()(const DisneyClearcoat &bsdf) const {
     Real alpha_g = (1 - clearcoat_gloss) * 0.1 + clearcoat_gloss * 0.001;
     Real D_c = ((alpha_g * alpha_g) - 1) / (c_PI * log(alpha_g * alpha_g) * (1 + (alpha_g * alpha_g - 1) * (h_local.z * h_local.z)));
     // 3. G_c
-	// This is the original implementation, but it's not precise enough -> too bright edges & a few weird random white dots for disney_clearcoat.xml
-	/* Real G_c = smith_masking_gtr2(to_local(frame, dir_in), 0.25) *
-	        smith_masking_gtr2(to_local(frame, dir_out), 0.25);  // roughness = 0.25 -> ad-hoc fit, no clear geometric */
-    Real G_c = smith_masking_gtr2_precise(to_local(frame, dir_in), 0.25) * 
-		       smith_masking_gtr2_precise(to_local(frame, dir_out), 0.25);  // roughness = 0.25 -> ad-hoc fit, no clear geometric
+	/*// roughness = 0.25 -> ad-hoc fit, no clear geometric; this func pow(4) the 0.25, so need to sqrt
+    Real G_c = smith_masking_gtr2(to_local(frame, dir_in), sqrt(0.25)) *
+	        smith_masking_gtr2(to_local(frame, dir_out), sqrt(0.25)); */
+    Real G_c = smith_masking_gtr2_alpha(to_local(frame, dir_in), 0.25) *
+               smith_masking_gtr2_alpha(to_local(frame, dir_out), 0.25);  // roughness = 0.25 -> ad-hoc fit, no clear geometric
 	// Compute the final result
 	Spectrum f_clearcoat = make_const_spectrum( F_c * D_c * G_c / (4 * abs(n_dot_in)) );
     return f_clearcoat;
