@@ -23,9 +23,9 @@ Spectrum eval_op::operator()(const DisneySheen &bsdf) const {
     Real n_dot_out = dot(frame.n, dir_out);  // cos(theta_out)
     Real h_dot_out = dot(h, dir_out);  // cos(theta_half_out)
     // 1. C_tint
-	Spectrum C_tint = luminance(base_color) > 0 ? base_color / luminance(base_color) : make_const_spectrum(1);
+    Spectrum C_tint = luminance(base_color) > 0 ? base_color / luminance(base_color) : make_const_spectrum(1);
     // 2. C_sheen
-	Spectrum C_sheen = (1 - sheen_tint) + sheen_tint * C_tint;
+    Spectrum C_sheen = (1 - sheen_tint) + sheen_tint * C_tint;
     // 3. f_sheen
     Spectrum f_sheen = C_sheen * pow(1 - abs(h_dot_out), 5) * abs(n_dot_out);
     return f_sheen;
