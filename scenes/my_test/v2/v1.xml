@@ -1,0 +1,216 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="4096"/>
+	<default name="resx" value="720"/>
+	<default name="resy" value="405"/>
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="path" id="elm__0" name="elm__0">
+		<integer name="max_depth" value="12"/>
+	</integrator>
+	<sensor type="perspective" id="elm__1" name="elm__1">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597755"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="50.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="2.13517369705005"/>
+			<rotate y="1" angle="-85.73713117931148"/>
+			<rotate z="1" angle="-0.004044271567677583"/>
+			<translate value="19.922268 3.244088 -1.201579"/>
+		</transform>
+		<sampler type="independent" name="sampler">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm" name="film">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+
+<!-- Materials -->
+
+	<bsdf type="twosided" id="mat-Ice Cream" name="mat-Ice Cream">
+		<bsdf type="principled" name="bsdf">
+			<rgb value="0.381326 0.577580 0.258183" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.640000"/>
+			<float name="sheen" value="0.400000"/>
+			<float name="sheen_tint" value="0.200000"/>
+			<float name="clearcoat" value="0.050000"/>
+			<float name="clearcoat_gloss" value="0.640000"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Matte Mirror" name="mat-Matte Mirror">
+		<bsdf type="principled" name="bsdf">
+			<rgb value="0.617394 0.800212 0.785868" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.022500"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.800000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Donut" name="mat-Donut">
+		<bsdf type="principled" name="bsdf">
+			<rgb value="0.500000 0.171610 0.016213" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.810000"/>
+			<float name="sheen" value="0.330000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.050000"/>
+			<float name="clearcoat_gloss" value="0.022500"/>
+			<float name="specular" value="0.001000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="principled" id="mat-Diamond Monkey" name="mat-Diamond Monkey">
+		<rgb value="1.000000 0.059788 0.197068" name="base_color"/>
+		<float name="spec_tint" value="0.100000"/>
+		<float name="spec_trans" value="1.000000"/>
+		<float name="metallic" value="0.000000"/>
+		<float name="anisotropic" value="0.000000"/>
+		<float name="roughness" value="0.000000"/>
+		<float name="sheen" value="0.000000"/>
+		<float name="sheen_tint" value="0.200000"/>
+		<float name="clearcoat" value="1.000000"/>
+		<float name="clearcoat_gloss" value="0.000000"/>
+		<float name="eta" value="2.417000"/>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Cone" name="mat-Cone">
+		<bsdf type="principled" name="bsdf">
+			<rgb value="0.644480 0.381326 0.191202" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.360000"/>
+			<float name="sheen" value="0.200000"/>
+			<float name="sheen_tint" value="0.100000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.400000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Cream" name="mat-Cream">
+		<bsdf type="principled" name="bsdf">
+			<rgb value="0.800000 0.800000 0.800000" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.250000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.000900"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="principled" id="mat-Ice" name="mat-Ice">
+		<rgb value="0.850000 0.900000 0.990000" name="base_color"/>
+		<float name="spec_tint" value="0.000000"/>
+		<float name="spec_trans" value="1.000000"/>
+		<float name="metallic" value="0.000000"/>
+		<float name="anisotropic" value="0.000000"/>
+		<float name="roughness" value="0.010000"/>
+		<float name="sheen" value="0.000000"/>
+		<float name="sheen_tint" value="0.000000"/>
+		<float name="clearcoat" value="0.800000"/>
+		<float name="clearcoat_gloss" value="0.002500"/>
+		<float name="eta" value="1.333330"/>
+	</bsdf>
+	<bsdf type="diffuse" id="mat-Melt Water" name="mat-Melt Water">
+		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	</bsdf>
+
+<!-- Emitters -->
+
+	<shape type="rectangle" id="elm__10" name="elm__10">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="0.908749 -0.298853 -0.291312 -2.716855 0.416026 0.593250 0.689186 9.713326 -0.033144 -0.747490 0.663446 5.493063 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area" name="emitter">
+			<rgb value="37.101479 61.280376 75.000000" name="radiance"/>
+		</emitter>
+		<bsdf type="null" name="bsdf"/>
+	</shape>
+	<shape type="rectangle" id="elm__11" name="elm__11">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="1.080982 0.893618 -2.069523 -8.204497 2.240203 -0.170369 1.096569 10.367890 0.250933 -2.328609 -0.874420 -1.542354 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area" name="emitter">
+			<rgb value="10.000000 2.823035 4.854517" name="radiance"/>
+		</emitter>
+		<bsdf type="null" name="bsdf"/>
+	</shape>
+
+<!-- Shapes -->
+
+	<shape type="ply" id="elm__3" name="elm__3">
+		<string name="filename" value="meshes/Ice_Cream.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Ice Cream" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm__5" name="elm__5">
+		<string name="filename" value="meshes/Floor.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Matte Mirror" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm__7" name="elm__7">
+		<string name="filename" value="meshes/Donut.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Donut" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm__9" name="elm__9">
+		<string name="filename" value="meshes/Suzanne.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Diamond Monkey" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm__13" name="elm__13">
+		<string name="filename" value="meshes/Cone.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Cone" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm__15" name="elm__15">
+		<string name="filename" value="meshes/Cream.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Cream" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm__16" name="elm__16">
+		<string name="filename" value="meshes/Sphere.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Ice Cream" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm__19" name="elm__19">
+		<string name="filename" value="meshes/Cube-Ice.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Ice" name="bsdf"/>
+	</shape>
+	<shape type="ply" id="elm__20" name="elm__20">
+		<string name="filename" value="meshes/Cube-Melt Water.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Melt Water" name="bsdf"/>
+	</shape>
+
+<!-- Volumes -->
+
+</scene>
