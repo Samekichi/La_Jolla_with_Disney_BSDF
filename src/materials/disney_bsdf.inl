@@ -3,7 +3,7 @@
 Spectrum eval_op::operator()(const DisneyBSDF &bsdf) const {
     bool reflect = dot(vertex.geometric_normal, dir_in) *
                    dot(vertex.geometric_normal, dir_out) > 0;
-    bool isInside = dot(vertex.geometric_normal, dir_in) <= 0;
+    bool is_inside = dot(vertex.geometric_normal, dir_in) <= 0;
 
     // Flip the shading frame if it is inconsistent with the geometry normal
     Frame frame = vertex.shading_frame;
@@ -20,7 +20,7 @@ Spectrum eval_op::operator()(const DisneyBSDF &bsdf) const {
     Real metallic = eval(bsdf.metallic, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real specular_transmission = eval(bsdf.specular_transmission, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real subsurface = eval(bsdf.subsurface, vertex.uv, vertex.uv_screen_size, texture_pool);
-    Real specular = eval(bsdf.specular, vertex.uv, vertex.uv_screen_size, texture_pool);
+    Real specular = eval(bsdf.specular, vertex.uv, vertex.uv_screen_size, texture_pool);            
     Real specular_tint = eval(bsdf.specular_tint, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real sheen = eval(bsdf.sheen, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real sheen_tint = eval(bsdf.sheen_tint, vertex.uv, vertex.uv_screen_size, texture_pool);
@@ -49,7 +49,7 @@ Spectrum eval_op::operator()(const DisneyBSDF &bsdf) const {
 
     // Check if incident inside (inside = only glass is needed, other weights all 0)
     Spectrum f_glass = operator()(DisneyGlass{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic, bsdf.eta });
-    if (isInside) {
+    if (is_inside) {
         return w_glass * f_glass;
     }
 
@@ -91,29 +91,6 @@ Spectrum eval_op::operator()(const DisneyBSDF &bsdf) const {
     // final f_metal
     f_metal = F_m * D_m * G_m / (4 * abs(n_dot_in));
 
-    //// compute disney_sheen
-    //Real n_dot_out = dot(frame.n, dir_out);  // cos(theta_out)
-    //// 2. C_sheen
-    //Spectrum C_sheen = (1 - sheen_tint) + sheen_tint * C_tint;
-    //// 3. f_sheen
-    //Spectrum f_sheen = C_sheen * pow(1 - abs(h_dot_out), 5) * abs(n_dot_out);
-
-    //// compute disney_clearcoat
-    //// 1. F_c
-    //Real R_0_c = pow(1.5 - 1, 2) / pow(1.5 + 1, 2);  // R_0(eta), where we hardcoded eta = 1.5
-    //Real F_c = R_0_c + (1 - R_0_c) * pow(1 - abs(h_dot_out), 5);
-    //// 2. D_c
-    //Real alpha_g = (1 - clearcoat_gloss) * 0.1 + clearcoat_gloss * 0.001;
-    //Real D_c = ((alpha_g * alpha_g) - 1) / (c_PI * log(alpha_g * alpha_g) * (1 + (alpha_g * alpha_g - 1) * (h_local.z * h_local.z)));
-    //// 3. G_c
-    ///*// roughness = 0.25 -> ad-hoc fit, no clear geometric; this func pow(4) the 0.25, so need to sqrt
-    //Real G_c = smith_masking_gtr2(to_local(frame, dir_in), sqrt(0.25)) *
-    //        smith_masking_gtr2(to_local(frame, dir_out), sqrt(0.25)); */
-    //Real G_c = smith_masking_gtr2_alpha(to_local(frame, dir_in), 0.25) *
-    //    smith_masking_gtr2_alpha(to_local(frame, dir_out), 0.25);  // roughness = 0.25 -> ad-hoc fit, no clear geometric
-    //// Compute the final result
-    //Spectrum f_clearcoat = make_const_spectrum(F_c * D_c * G_c / (4 * abs(n_dot_in)));
-
 	// Compute the final result
     return w_diffuse * f_diffuse + 
 		   w_sheen * f_sheen + 
@@ -126,7 +103,7 @@ Spectrum eval_op::operator()(const DisneyBSDF &bsdf) const {
 Real pdf_sample_bsdf_op::operator()(const DisneyBSDF &bsdf) const {
     bool reflect = dot(vertex.geometric_normal, dir_in) *
                    dot(vertex.geometric_normal, dir_out) > 0;
-    bool isInside = dot(vertex.geometric_normal, dir_in) <= 0;
+    bool is_inside = dot(vertex.geometric_normal, dir_in) <= 0;
     
     // Flip the shading frame if it is inconsistent with the geometry normal
     Frame frame = vertex.shading_frame;
@@ -160,7 +137,7 @@ Real pdf_sample_bsdf_op::operator()(const DisneyBSDF &bsdf) const {
 
     // Check if incident inside (inside = only glass is needed, other weights all 0)
     Real p_glass = operator()(DisneyGlass{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic, bsdf.eta });
-    if (isInside) {
+    if (is_inside) {
         return p_glass;
     }
 
@@ -200,7 +177,6 @@ Real pdf_sample_bsdf_op::operator()(const DisneyBSDF &bsdf) const {
 
     Real p_metal = 0;  // need to modify p_metal to consider different h
     Real n_dot_in = dot(frame.n, dir_in);  // cos(theta_in)
-    //Real h_dot_out = dot(h, dir_out);  // cos(theta_half_out)
     // 1. D_m
     Real D_m = GTR2(h_local, roughness, anisotropic);
     // 2. G_m
@@ -226,7 +202,7 @@ Real pdf_sample_bsdf_op::operator()(const DisneyBSDF &bsdf) const {
 
 std::optional<BSDFSampleRecord>
         sample_bsdf_op::operator()(const DisneyBSDF &bsdf) const {
-    bool isInside = dot(vertex.geometric_normal, dir_in) <= 0;
+    bool is_inside = dot(vertex.geometric_normal, dir_in) <= 0;
 
     // Flip the shading frame if it is inconsistent with the geometry normal
     Frame frame = vertex.shading_frame;
@@ -258,7 +234,7 @@ std::optional<BSDFSampleRecord>
     clearcoat_gloss = std::clamp(clearcoat_gloss, Real(0.01), Real(1));
 
 	// Check if incident inside (inside = only glass is needed, other weights all 0)
-    if (isInside) {
+    if (is_inside) {
         return operator()(DisneyGlass{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic, bsdf.eta });
     }
 
@@ -278,18 +254,31 @@ std::optional<BSDFSampleRecord>
     // Importance sampling
 	Real rnd = rnd_param_w;
     std::optional<BSDFSampleRecord> sample;
-    if (rnd <= w_diffuse) {
-		sample = operator()(DisneyDiffuse{ bsdf.base_color, bsdf.roughness, bsdf.subsurface });
-	}
-	else if (rnd <= w_diffuse + w_metal) {
-		sample = operator()(DisneyMetal{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic });
+ //   if (rnd < w_diffuse) {
+	//	sample = operator()(DisneyDiffuse{ bsdf.base_color, bsdf.roughness, bsdf.subsurface });
+	//}
+	//else if (rnd < w_diffuse + w_metal) {
+	//	sample = operator()(DisneyMetal{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic });
+ //   }
+	//else if (rnd < w_diffuse + w_metal + w_clearcoat) {
+	//	sample = operator()(DisneyClearcoat{ bsdf.clearcoat_gloss });
+	//}
+	//else {
+	//	sample = operator()(DisneyGlass{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic, bsdf.eta });
+	//}
+
+    if (rnd < w_glass) {
+        sample = operator()(DisneyGlass{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic, bsdf.eta });
     }
-	else if (rnd <= w_diffuse + w_metal + w_clearcoat) {
-		sample = operator()(DisneyClearcoat{ bsdf.clearcoat_gloss });
-	}
-	else {
-		sample = operator()(DisneyGlass{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic, bsdf.eta });
-	}
+    else if (rnd < w_glass + w_diffuse) {
+        sample = operator()(DisneyDiffuse{ bsdf.base_color, bsdf.roughness, bsdf.subsurface });
+    }
+    else if (rnd < w_glass + w_diffuse + w_metal) {
+        sample = operator()(DisneyMetal{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic });
+    }
+    else {
+        sample = operator()(DisneyClearcoat{ bsdf.clearcoat_gloss });
+    }
 
     return sample;
     // return {};

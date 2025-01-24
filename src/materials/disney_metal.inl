@@ -27,7 +27,7 @@ Spectrum eval_op::operator()(const DisneyMetal &bsdf) const {
 	Real n_dot_in = dot(frame.n, dir_in);  // cos(theta_in)
 	Real h_dot_out = dot(h, dir_out);  // cos(theta_half_out)
     // 1. F_m
-	Spectrum F_m = schlick_fresnel(base_color, h_dot_out);
+	Spectrum F_m = schlick_fresnel(base_color, abs(h_dot_out));
     // 2. D_m
 	Real D_m = GTR2(h_local, roughness, anisotropic);
     // 3. G_m
@@ -69,7 +69,7 @@ Real pdf_sample_bsdf_op::operator()(const DisneyMetal &bsdf) const {
     Real G_m = smith_masking_gtr2(to_local(frame, dir_in), roughness, anisotropic);
     Real D_m = GTR2(h_local, roughness, anisotropic);
     // (4 * cos_theta_v) is the Jacobian of the reflectiokn
-    return (G_m * D_m) / (4 * n_dot_in);
+    return (G_m * D_m) / (4 * abs(n_dot_in));
     // return 0;
 }
 

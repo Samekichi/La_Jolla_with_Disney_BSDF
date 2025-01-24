@@ -103,7 +103,7 @@ inline Real smith_masking_gtr2(const Vector3& v_local, Real roughness, Real anis
     Real alpha_y = max(alpha_min, (roughness * roughness) * aspect);
     Real Lambda = (
                     sqrt(
-                        1 + (alpha_x * (v_local.x * v_local.x) + alpha_y * (v_local.y * v_local.y)) / (v_local.z * v_local.z)
+                        1 + (alpha_x * alpha_x * (v_local.x * v_local.x) + alpha_y * alpha_y * (v_local.y * v_local.y)) / (v_local.z * v_local.z)
                     ) - 1
                  ) / 2;
 	return 1 / (1 + Lambda);
