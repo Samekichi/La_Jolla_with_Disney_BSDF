@@ -1,8 +1,8 @@
 #include "../microfacet.h"
 
-Spectrum eval_op::operator()(const DisneyBSDF &bsdf) const {
+Spectrum eval_op::operator()(const DisneyBSDF& bsdf) const {
     bool reflect = dot(vertex.geometric_normal, dir_in) *
-                   dot(vertex.geometric_normal, dir_out) > 0;
+        dot(vertex.geometric_normal, dir_out) > 0;
     bool is_inside = dot(vertex.geometric_normal, dir_in) <= 0;
 
     // Flip the shading frame if it is inconsistent with the geometry normal
@@ -20,7 +20,7 @@ Spectrum eval_op::operator()(const DisneyBSDF &bsdf) const {
     Real metallic = eval(bsdf.metallic, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real specular_transmission = eval(bsdf.specular_transmission, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real subsurface = eval(bsdf.subsurface, vertex.uv, vertex.uv_screen_size, texture_pool);
-    Real specular = eval(bsdf.specular, vertex.uv, vertex.uv_screen_size, texture_pool);            
+    Real specular = eval(bsdf.specular, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real specular_tint = eval(bsdf.specular_tint, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real sheen = eval(bsdf.sheen, vertex.uv, vertex.uv_screen_size, texture_pool);
     Real sheen_tint = eval(bsdf.sheen_tint, vertex.uv, vertex.uv_screen_size, texture_pool);
@@ -47,6 +47,14 @@ Spectrum eval_op::operator()(const DisneyBSDF &bsdf) const {
     Real w_clearcoat = 0.25 * clearcoat;
     Real w_glass = (1 - metallic) * specular_transmission;
 
+    // Normalize weights
+    Real w = w_diffuse + w_metal + w_clearcoat + w_glass + w_sheen;
+    w_diffuse /= w;
+    w_metal /= w;
+    w_clearcoat /= w;
+    w_glass /= w;
+    w_sheen /= w;
+
     // Check if incident inside (inside = only glass is needed, other weights all 0)
     Spectrum f_glass = operator()(DisneyGlass{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic, bsdf.eta });
     if (is_inside) {
@@ -55,9 +63,9 @@ Spectrum eval_op::operator()(const DisneyBSDF &bsdf) const {
 
     // Compute remaining DisneyBSDF's components
     Spectrum f_diffuse = operator()(DisneyDiffuse{ bsdf.base_color, bsdf.roughness, bsdf.subsurface });
-	Spectrum f_clearcoat = operator()(DisneyClearcoat{ bsdf.clearcoat_gloss });
-	Spectrum f_sheen = operator()(DisneySheen{ bsdf.base_color, bsdf.sheen_tint });
-	Spectrum f_metal;  // need modified Fresnel term `F_m` to include an achromatic specular component, with control para `specular_tint` to potentially make it closer to base_color
+    Spectrum f_clearcoat = operator()(DisneyClearcoat{ bsdf.clearcoat_gloss });
+    Spectrum f_sheen = operator()(DisneySheen{ bsdf.base_color, bsdf.sheen_tint });
+    Spectrum f_metal = make_zero_spectrum();  // need modified Fresnel term `F_m` to include an achromatic specular component, with control para `specular_tint` to potentially make it closer to base_color
     // compute DisneyMetal
     // 0. common vars
     Vector3 h;
@@ -74,22 +82,24 @@ Spectrum eval_op::operator()(const DisneyBSDF &bsdf) const {
     //if (dot(h, frame.n) < 0) {
     //    h = -h;
     //}
+    if (dot(vertex.geometric_normal, dir_out) > 0) {
     Vector3 h_local = to_local(frame, h);
     Real n_dot_in = dot(frame.n, dir_in);  // cos(theta_in)
     Real h_dot_out = dot(h, dir_out);  // cos(theta_half_out)
     // 1. F_m
     Spectrum C_tint = luminance(base_color) > 0 ? base_color / luminance(base_color) : make_const_spectrum(1);
     Spectrum K_s = (1 - specular_tint) + specular_tint * C_tint;
-	Real R_0 = (eta - 1) * (eta - 1) / ((eta + 1) * (eta + 1));
+    Real R_0 = (eta - 1) * (eta - 1) / ((eta + 1) * (eta + 1));
     Spectrum C_0 = specular * R_0 * (1 - metallic) * K_s + metallic * base_color;
-	Spectrum F_m = C_0 + (1 - C_0) * pow(1 - abs(h_dot_out), 5);
+    Spectrum F_m = C_0 + (1 - C_0) * pow(1 - abs(h_dot_out), 5);
     // 2. D_m
     Real D_m = GTR2(h_local, roughness, anisotropic);
     // 3. G_m
     Real G_m = smith_masking_gtr2(to_local(frame, dir_in), roughness, anisotropic) *
-               smith_masking_gtr2(to_local(frame, dir_out), roughness, anisotropic);
+        smith_masking_gtr2(to_local(frame, dir_out), roughness, anisotropic);
     // final f_metal
     f_metal = F_m * D_m * G_m / (4 * abs(n_dot_in));
+    }
 
 	// Compute the final result
     return w_diffuse * f_diffuse + 
@@ -152,38 +162,39 @@ Real pdf_sample_bsdf_op::operator()(const DisneyBSDF &bsdf) const {
     Real p_clearcoat = operator()(DisneyClearcoat{ bsdf.clearcoat_gloss });
 	//Real p_clearcoat = 0;
     // compute subcomponents
-    Vector3 h;
-    if (reflect) {
-        h = normalize(dir_in + dir_out);
-    }
-    else {
-        // "Generalized half-vector" from Walter et al.
-        // See "Microfacet Models for Refraction through Rough Surfaces"
-        //h = normalize(dir_in + dir_out * eta);
-        h = normalize(dir_in + dir_out);
-    }
-    // flip half-vector if it's below surface
-    //if (dot(h, frame.n) < 0) {
-    //    h = -h;
+    //Vector3 h;
+    //if (reflect) {
+    //    h = normalize(dir_in + dir_out);
     //}
-    Vector3 h_local = to_local(frame, h);
-    Real h_dot_out = dot(h, dir_out);  // cos(theta_half_out)
-    Real n_dot_h = dot(frame.n, h);  // cos(theta_half)
-    // 1. D_c
-    Real alpha_g = (1 - clearcoat_gloss) * 0.1 + clearcoat_gloss * 0.001;
-    Real D_c = ((alpha_g * alpha_g) - 1) / (c_PI * log(alpha_g * alpha_g) * (1 + (alpha_g * alpha_g - 1) * (h_local.z * h_local.z)));
-    // Compute final PDF
-    //p_clearcoat = D_c * abs(n_dot_h) / (4 * abs(h_dot_out));
+    //else {
+    //    // "Generalized half-vector" from Walter et al.
+    //    // See "Microfacet Models for Refraction through Rough Surfaces"
+    //    //h = normalize(dir_in + dir_out * eta);
+    //    h = normalize(dir_in + dir_out);
+    //}
+    //// flip half-vector if it's below surface
+    ////if (dot(h, frame.n) < 0) {
+    ////    h = -h;
+    ////}
+    //Vector3 h_local = to_local(frame, h);
+    //Real h_dot_out = dot(h, dir_out);  // cos(theta_half_out)
+    //Real n_dot_h = dot(frame.n, h);  // cos(theta_half)
+    //// 1. D_c
+    //Real alpha_g = (1 - clearcoat_gloss) * 0.1 + clearcoat_gloss * 0.001;
+    //Real D_c = ((alpha_g * alpha_g) - 1) / (c_PI * log(alpha_g * alpha_g) * (1 + (alpha_g * alpha_g - 1) * (h_local.z * h_local.z)));
+    //// Compute final PDF
+    ////p_clearcoat = D_c * abs(n_dot_h) / (4 * abs(h_dot_out));
 
-    Real p_metal = 0;  // need to modify p_metal to consider different h
-    Real n_dot_in = dot(frame.n, dir_in);  // cos(theta_in)
-    // 1. D_m
-    Real D_m = GTR2(h_local, roughness, anisotropic);
-    // 2. G_m
-    Real G_m = smith_masking_gtr2(to_local(frame, dir_in), roughness, anisotropic) *
-               smith_masking_gtr2(to_local(frame, dir_out), roughness, anisotropic);
+    //Real p_metal = 0;  // need to modify p_metal to consider different h
+    //Real n_dot_in = dot(frame.n, dir_in);  // cos(theta_in)
+    //// 1. D_m
+    //Real D_m = GTR2(h_local, roughness, anisotropic);
+    //// 2. G_m
+    //Real G_m = smith_masking_gtr2(to_local(frame, dir_in), roughness, anisotropic) *
+    //           smith_masking_gtr2(to_local(frame, dir_out), roughness, anisotropic);
+	Real p_metal = operator()(DisneyMetal{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic });
     // final p_metal
-    p_metal = D_m * G_m / (4 * abs(n_dot_in));
+    //p_metal = D_m * G_m / (4 * abs(n_dot_in));
     
     // Normalize weights
     Real w = w_diffuse + w_metal + w_clearcoat + w_glass;

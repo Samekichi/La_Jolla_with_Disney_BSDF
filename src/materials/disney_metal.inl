@@ -93,7 +93,8 @@ std::optional<BSDFSampleRecord>
     Real anisotropic = eval(bsdf.anisotropic, vertex.uv, vertex.uv_screen_size, texture_pool);
     // Clamp roughness to avoid numerical issues.
     roughness = std::clamp(roughness, Real(0.01), Real(1));
-    
+    anisotropic = std::clamp(anisotropic, Real(0.01), Real(1));
+
     Real aspect = sqrt(1 - 0.9 * anisotropic);
     Real alpha_min = 0.0001;
     Real alpha_x = max(alpha_min, (roughness * roughness) / aspect);
