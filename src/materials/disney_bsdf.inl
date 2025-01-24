@@ -67,13 +67,13 @@ Spectrum eval_op::operator()(const DisneyBSDF &bsdf) const {
     else {
         // "Generalized half-vector" from Walter et al.
         // See "Microfacet Models for Refraction through Rough Surfaces"
-        h = normalize(dir_in + dir_out * eta);
-        //h = normalize(dir_in + dir_out);
+        //h = normalize(dir_in + dir_out * eta);
+        h = normalize(dir_in + dir_out);
     }
     // flip half-vector if it's below surface
-    if (dot(h, frame.n) < 0) {
-        h = -h;
-    }
+    //if (dot(h, frame.n) < 0) {
+    //    h = -h;
+    //}
     Vector3 h_local = to_local(frame, h);
     Real n_dot_in = dot(frame.n, dir_in);  // cos(theta_in)
     Real h_dot_out = dot(h, dir_out);  // cos(theta_half_out)
@@ -159,13 +159,13 @@ Real pdf_sample_bsdf_op::operator()(const DisneyBSDF &bsdf) const {
     else {
         // "Generalized half-vector" from Walter et al.
         // See "Microfacet Models for Refraction through Rough Surfaces"
-        h = normalize(dir_in + dir_out * eta);
-        //h = normalize(dir_in + dir_out);
+        //h = normalize(dir_in + dir_out * eta);
+        h = normalize(dir_in + dir_out);
     }
     // flip half-vector if it's below surface
-    if (dot(h, frame.n) < 0) {
-        h = -h;
-    }
+    //if (dot(h, frame.n) < 0) {
+    //    h = -h;
+    //}
     Vector3 h_local = to_local(frame, h);
     Real h_dot_out = dot(h, dir_out);  // cos(theta_half_out)
     Real n_dot_h = dot(frame.n, h);  // cos(theta_half)
@@ -254,31 +254,31 @@ std::optional<BSDFSampleRecord>
     // Importance sampling
 	Real rnd = rnd_param_w;
     std::optional<BSDFSampleRecord> sample;
- //   if (rnd < w_diffuse) {
-	//	sample = operator()(DisneyDiffuse{ bsdf.base_color, bsdf.roughness, bsdf.subsurface });
-	//}
-	//else if (rnd < w_diffuse + w_metal) {
-	//	sample = operator()(DisneyMetal{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic });
- //   }
-	//else if (rnd < w_diffuse + w_metal + w_clearcoat) {
-	//	sample = operator()(DisneyClearcoat{ bsdf.clearcoat_gloss });
-	//}
-	//else {
-	//	sample = operator()(DisneyGlass{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic, bsdf.eta });
-	//}
+    if (rnd < w_diffuse) {
+		sample = operator()(DisneyDiffuse{ bsdf.base_color, bsdf.roughness, bsdf.subsurface });
+	}
+	else if (rnd < w_diffuse + w_metal) {
+		sample = operator()(DisneyMetal{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic });
+    }
+	else if (rnd < w_diffuse + w_metal + w_clearcoat) {
+		sample = operator()(DisneyClearcoat{ bsdf.clearcoat_gloss });
+	}
+	else {
+		sample = operator()(DisneyGlass{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic, bsdf.eta });
+	}
 
-    if (rnd < w_glass) {
-        sample = operator()(DisneyGlass{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic, bsdf.eta });
-    }
-    else if (rnd < w_glass + w_diffuse) {
-        sample = operator()(DisneyDiffuse{ bsdf.base_color, bsdf.roughness, bsdf.subsurface });
-    }
-    else if (rnd < w_glass + w_diffuse + w_metal) {
-        sample = operator()(DisneyMetal{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic });
-    }
-    else {
-        sample = operator()(DisneyClearcoat{ bsdf.clearcoat_gloss });
-    }
+    //if (rnd < w_glass) {
+    //    sample = operator()(DisneyGlass{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic, bsdf.eta });
+    //}
+    //else if (rnd < w_glass + w_diffuse) {
+    //    sample = operator()(DisneyDiffuse{ bsdf.base_color, bsdf.roughness, bsdf.subsurface });
+    //}
+    //else if (rnd < w_glass + w_diffuse + w_metal) {
+    //    sample = operator()(DisneyMetal{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic });
+    //}
+    //else {
+    //    sample = operator()(DisneyClearcoat{ bsdf.clearcoat_gloss });
+    //}
 
     return sample;
     // return {};
