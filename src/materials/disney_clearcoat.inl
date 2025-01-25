@@ -23,7 +23,7 @@ Spectrum eval_op::operator()(const DisneyClearcoat &bsdf) const {
 	Vector3 h_local = to_local(frame, h);
 	Real h_dot_out = dot(h, dir_out);  // cos(theta_half_out)
 	Real n_dot_in = dot(frame.n, dir_in);  // cos(theta_in)
-    // 1. F_c
+    // 1. F_c   
 	Real R_0 = pow(1.5 - 1, 2) / pow(1.5 + 1, 2);  // R_0(eta), where we hardcoded eta = 1.5
 	Real F_c = R_0 + (1 - R_0) * pow(1 - abs(h_dot_out), 5);
     // 2. D_c
