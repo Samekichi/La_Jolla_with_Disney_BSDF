@@ -47,14 +47,6 @@ Spectrum eval_op::operator()(const DisneyBSDF& bsdf) const {
     Real w_clearcoat = 0.25 * clearcoat;
     Real w_glass = (1 - metallic) * specular_transmission;
 
-    // Normalize weights
-    Real w = w_diffuse + w_metal + w_clearcoat + w_glass + w_sheen;
-    w_diffuse /= w;
-    w_metal /= w;
-    w_clearcoat /= w;
-    w_glass /= w;
-    w_sheen /= w;
-
     // Check if incident inside (inside = only glass is needed, other weights all 0)
     Spectrum f_glass = operator()(DisneyGlass{ bsdf.base_color, bsdf.roughness, bsdf.anisotropic, bsdf.eta });
     if (is_inside) {
