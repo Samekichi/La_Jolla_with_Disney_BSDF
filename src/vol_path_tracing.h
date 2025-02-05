@@ -96,13 +96,15 @@ Spectrum vol_path_tracing_2(const Scene &scene,
         Vector3 dir_light = normalize(point_on_light.position - p);
         Spectrum phase = eval(get_phase_function(scene.media[scene.camera.medium_id]), camera_ray.dir, dir_light);
         // ii. compute Le at light
-        Spectrum Le = emission(light, -dir_light, 0, point_on_light, scene);
-        //// *. visible check
-        //Ray probe_ray{ p, dir_light, Real(0), infinity<Real>() };
-        //std::optional<PathVertex> hit_vertex = intersect(scene, probe_ray, ray_diff);
-        //if (hit_vertex && distance(hit_vertex.value().position, point_on_light.position) > 0.001) {
-        //    return make_zero_spectrum();
-        //}
+        Spectrum Le = emission(light, -dir_light, ray_diff.spread, point_on_light, scene);
+        // *. visible check
+        Ray shadow_ray{ p, dir_light,
+                        get_shadow_epsilon(scene),
+                        (1 - get_shadow_epsilon(scene)) *
+                            distance(point_on_light.position, p) };
+        if (occluded(scene, shadow_ray)) {
+            return make_zero_spectrum();
+        }
         // iii. compute L_scatter1(p, w)
         Spectrum L_scatter1_estimate = phase * Le * exp(-sigma_t * distance(point_on_light.position, p)) * abs(dot(dir_light, point_on_light.normal)) / distance_squared(point_on_light.position, p);  // ignoring visible test
 
