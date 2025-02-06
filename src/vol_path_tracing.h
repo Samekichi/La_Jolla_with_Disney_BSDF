@@ -291,15 +291,15 @@ Spectrum vol_path_tracing_3(const Scene &scene,
             else {
                 trans_pdf = exp(-sigma_t * t_hit);
                 transmittance = exp(-sigma_t_vec * t_hit);
-                ray.org = ray.org + (t_hit + get_intersection_epsilon(scene)) * ray.dir;
+                ray.org = vertex.position + get_intersection_epsilon(scene) * ray.dir;
             }
-            
+
         }
         // Update accumulated transmittance
         current_path_throughput *= (transmittance / trans_pdf);
 
         // Hits a surface: add its contributed emission Le
-        if (!scatter) {
+        if (!scatter && vertex_) {
             Spectrum Le = make_zero_spectrum();
             if (is_light(scene.shapes[vertex.shape_id])) {
                 Le = emission(vertex, -ray.dir, scene);
