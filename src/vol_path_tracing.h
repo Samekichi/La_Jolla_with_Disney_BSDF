@@ -197,7 +197,7 @@ inline Spectrum next_event_estimation(Ray ray,  // incoming ray from previous no
             // we want to pass throuh -- this introduces one extra connection vertex
             shadow_bounces += 1;
 
-            if (scene.options.max_depth != -1 && bounces + shadow_bounces >= scene.options.max_depth) {
+            if (scene.options.max_depth != -1 && bounces + shadow_bounces + 1 >= scene.options.max_depth) {
                 // We've reached the max depth
                 return make_zero_spectrum();
             }
@@ -206,7 +206,7 @@ inline Spectrum next_event_estimation(Ray ray,  // incoming ray from previous no
             p = p + (next_t + get_intersection_epsilon(scene)) * shadow_ray.dir;
         }
     }
-
+    // Reached light source, compute its contribution to `ray`
     if (T_light > 0) {
         // Compute contrib = T_light * G * rho * L / pdf_NEE
         // G
@@ -226,7 +226,7 @@ inline Spectrum next_event_estimation(Ray ray,  // incoming ray from previous no
         //   will reach the light source.
         // - We also need to multiply with G to convert phase function PDF to area measure.
         // Compute w = pdf_NEE^2 / (pdf_NEE^2 + pdf_phase^2)
-        Real pdf_phase = pdf_sample_phase(phase, ray.dir, dir_light);
+        Real pdf_phase = pdf_sample_phase(phase, ray.dir, dir_light) * G * p_trans_dir;
         Real w = pdf_NEE * pdf_NEE / (pdf_NEE * pdf_NEE + pdf_phase * pdf_phase);
         return w * contrib;
     }
@@ -307,11 +307,11 @@ Spectrum vol_path_tracing_3(const Scene &scene,
             radiance += current_path_throughput * Le;
         }
         // Check if need to cut off the path (i.e., there's a max_depth and we reached it)
-        if (scene.options.max_depth != -1 && bounces >= scene.options.max_depth) {
+        if (scene.options.max_depth != -1 && bounces + 1 >= scene.options.max_depth) {
             break;
         }
         // Hit index-matching surface (volume boundaries): update current_medium & continue to next iteration
-        if (!scatter ) {
+        if (!scatter && vertex_) {
             if (vertex.material_id == -1) {
                 current_medium = update_medium(ray, vertex);
                 bounces += 1;
@@ -327,8 +327,8 @@ Spectrum vol_path_tracing_3(const Scene &scene,
             Spectrum sigma_s = get_sigma_s(scene.media[current_medium], ray.org);
 
             //Spectrum nee_contrib = next_event_estimation(ray, current_medium, bounces, scene, rng);
-            //radiance += current_path_throughput * nee_contrib;
-
+            //radiance += current_path_throughput * nee_contrib * sigma_s;
+            //break;
             current_path_throughput *= eval(phase, ray.dir, next_dir) / pdf_sample_phase(phase, ray.dir, next_dir) * sigma_s;
             // update ray.dir
             ray.dir = next_dir;
@@ -425,7 +425,7 @@ Spectrum vol_path_tracing_4(const Scene &scene,
         current_path_throughput *= (transmittance / trans_pdf);
 
         // Hits a surface: add its contributed emission Le
-        if (!scatter) {
+        if (!scatter && vertex_) {
             Spectrum Le = make_zero_spectrum();
             if (is_light(scene.shapes[vertex.shape_id])) {
                 Le = emission(vertex, -ray.dir, scene);
@@ -433,7 +433,7 @@ Spectrum vol_path_tracing_4(const Scene &scene,
             radiance += current_path_throughput * Le;
         }
         // Check if need to cut off the path (i.e., there's a max_depth and we reached it)
-        if (scene.options.max_depth != -1 && bounces >= scene.options.max_depth) {
+        if (scene.options.max_depth != -1 && bounces + 1 >= scene.options.max_depth) {
             break;
         }
         // Hit index-matching surface (volume boundaries): update current_medium & continue to next iteration
@@ -453,12 +453,12 @@ Spectrum vol_path_tracing_4(const Scene &scene,
             Spectrum sigma_s = get_sigma_s(scene.media[current_medium], ray.org);
             
             Spectrum nee_contrib = next_event_estimation(ray, current_medium, bounces, scene, rng);
-            radiance += current_path_throughput * nee_contrib;
+            radiance += current_path_throughput * nee_contrib * sigma_s;
             break;
-            //current_path_throughput *= eval(phase, ray.dir, next_dir) / pdf_sample_phase(phase, ray.dir, next_dir) * sigma_s;
+            current_path_throughput *= eval(phase, ray.dir, next_dir) / pdf_sample_phase(phase, ray.dir, next_dir) * sigma_s;
 
-            //// update ray.dir
-            //ray.dir = next_dir;
+            // update ray.dir
+            ray.dir = next_dir;
         }
         else {
             break;  // Hit a surface -- we don't need to deal with this yet
