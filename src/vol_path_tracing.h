@@ -437,7 +437,8 @@ Spectrum vol_path_tracing_4(const Scene &scene,
         // Update accumulated transmittance
         current_path_throughput *= (transmittance / trans_pdf);
 
-        // Hits a surface: include its emission Le
+        // Hits a solid surface: include its emission Le
+        // (will stop the path-tracing loop in a later `if`)
         if (!scatter && vertex.material_id >= 0 && is_light(scene.shapes[vertex.shape_id])) {
             Spectrum Le = make_zero_spectrum();
             if (never_scatter) {
@@ -469,8 +470,8 @@ Spectrum vol_path_tracing_4(const Scene &scene,
         if (!scatter && vertex_) {
             if (vertex.material_id == -1) {
                 current_medium = update_medium(ray, vertex, current_medium);
+                // add epsilon to avoid stucking on the same surface's intersection
                 ray.org = vertex.position + ray.dir * get_intersection_epsilon(scene);
-                
                 bounces += 1;
                 continue;
             }
@@ -479,7 +480,7 @@ Spectrum vol_path_tracing_4(const Scene &scene,
         // Hit volume: NEE & sample next direction
         if (scatter) {
             Spectrum sigma_s = get_sigma_s(scene.media[current_medium], ray.org);
-            // NEE
+            // NEE (contribution already weighted by w)
             Spectrum nee_contrib = next_event_estimation(ray, current_medium, bounces, scene, rng);
             radiance += current_path_throughput * nee_contrib * sigma_s;
 
