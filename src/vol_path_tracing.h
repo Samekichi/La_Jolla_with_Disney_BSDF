@@ -155,6 +155,7 @@ inline Spectrum next_event_estimation(
     // sample 1 light source
     Real light_w = next_pcg32_real<Real>(rng);
     int light_id = sample_light(scene, light_w);
+    assert(light_id >= 0 && light_id < scene.lights.size());
     const Light& light = scene.lights[light_id];
     // sample 1 point on that light source's surface
     Vector2 light_uv{ next_pcg32_real<Real>(rng), next_pcg32_real<Real>(rng) };
@@ -167,6 +168,7 @@ inline Spectrum next_event_estimation(
     Vector3 dir_in = -ray.dir;
     Real T_light = 1;
     int shadow_medium = current_medium;
+    //assert(shadow_medium >= 0 && shadow_medium < scene.media.size());
     int shadow_bounces = 0;
     Real p_trans_dir = 1;  // for multiple importance sampling
 
@@ -187,6 +189,7 @@ inline Spectrum next_event_estimation(
 
         // Account for the transmittance to next_t
         if (shadow_medium >= 0) {
+            assert(shadow_medium < scene.media.size());
             Spectrum sigma_s = get_sigma_s(scene.media[shadow_medium], p);
             Spectrum sigma_a = get_sigma_a(scene.media[shadow_medium], p);
             Spectrum sigma_t_vec = sigma_s + sigma_a;
@@ -233,14 +236,15 @@ inline Spectrum next_event_estimation(
         // G
         Real G = max(-dot(dir_light, p_prime.normal), Real(0)) / distance_squared(p_prime.position, original_p);
         // rho OR f
-        PhaseFunction phase = get_phase_function(scene.media[current_medium]);
         Spectrum f;  // "intrinsic color"
         if (is_start_volume) {
+            assert(current_medium >= 0 && current_medium < scene.media.size());
             // `rho` by phase function at the started volume
-            f = eval(phase, dir_in, dir_light);
+            f = eval(get_phase_function(scene.media[current_medium]), dir_in, dir_light);
         }
         else {
             // `f` by intersection's material BSDF
+            assert(current_material >= 0 && current_material < scene.materials.size());
             f = eval(scene.materials[current_material], dir_in, dir_light, start_vertex, scene.texture_pool);
         }
         // L
@@ -256,9 +260,10 @@ inline Spectrum next_event_estimation(
         Real pdf_scatter;
         if (is_start_volume) {
             // pdf by phase function at the started volume
-            pdf_scatter = pdf_sample_phase(phase, dir_in, dir_light) * G;
+            pdf_scatter = pdf_sample_phase(get_phase_function(scene.media[current_medium]), dir_in, dir_light) * G;
         }
         else {
+            assert(current_material >= 0 && current_material < scene.materials.size());
             // pdf by intersection's material BSDF
             pdf_scatter = pdf_sample_bsdf(scene.materials[current_material], dir_in, dir_light, start_vertex, scene.texture_pool) * G;
         }
@@ -563,6 +568,7 @@ Spectrum vol_path_tracing_5(const Scene &scene,
     Ray ray = sample_primary(scene.camera, screen_pos);
     // Variables for recursively computing L_scatter(p, w)
     int current_medium = scene.camera.medium_id;
+    //assert(current_medium >= 0 && current_medium < scene.media.size());
     Spectrum current_path_throughput = make_const_spectrum(1);  // contrib(path) / p(path)
     Spectrum radiance = make_zero_spectrum();
     // - path has at most (scene.options.max_depth + 1) nodes;
@@ -591,6 +597,7 @@ Spectrum vol_path_tracing_5(const Scene &scene,
 
         // Sample a distance `t` towards the intersection, and check if it hits the intersection
         if (current_medium >= 0) {
+            assert(current_medium < scene.media.size());
             // sample one step distance `t` s.t. p(t) ~ exp(-sigma_t * t)
             Real u = next_pcg32_real<Real>(rng);
             Spectrum sigma_s = get_sigma_s(scene.media[current_medium], ray.org);
@@ -620,6 +627,10 @@ Spectrum vol_path_tracing_5(const Scene &scene,
         // Update accumulated transmittance
         current_path_throughput *= (transmittance / trans_pdf);
 
+        if (!scatter && vertex_) {
+            assert(vertex.shape_id >= 0);
+            assert(vertex.shape_id < scene.shapes.size());
+        }
         // Hits a light source: include its emission Le
         if (!scatter && vertex_ && is_light(scene.shapes[vertex.shape_id])) {
             Spectrum Le = make_zero_spectrum();
@@ -667,6 +678,8 @@ Spectrum vol_path_tracing_5(const Scene &scene,
             // Case 2: Hit a solid surface
             // - NEE & sample next direction based on the surface's BSDF
             else {
+                assert(mat_id >= 0);
+                assert(mat_id < scene.materials.size());
                 const Material& mat = scene.materials[mat_id];
 
                 // NEE (contribution already weighted by w)
@@ -701,6 +714,7 @@ Spectrum vol_path_tracing_5(const Scene &scene,
                 // update ray.dir
                 ray.dir = next_dir;
                 ray.org = vertex.position + ray.dir * get_intersection_epsilon(scene);
+                //current_medium = update_medium(ray, vertex, current_medium);
 
                 // cache
                 nee_p_cache = ray.org;
@@ -712,6 +726,7 @@ Spectrum vol_path_tracing_5(const Scene &scene,
 
         // Hit volume: NEE & sample next direction
         if (scatter) {
+            assert(current_medium >= 0 && current_medium < scene.media.size());
             Spectrum sigma_s = get_sigma_s(scene.media[current_medium], ray.org);
             // NEE (contribution already weighted by w)
             Spectrum nee_contrib = next_event_estimation(vertex, ray, true, current_medium, -1, bounces, scene, rng);
