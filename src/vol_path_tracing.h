@@ -818,7 +818,6 @@ inline Spectrum next_event_estimation_chromatic(
             Real channel = std::clamp(int(u * 3), 0, 2);  // randomly select a channel from RGB
             Real accum_t = 0;
             int iteration = 0;
-            //Vector3 p_probe = p;  // probe vertex for sampling t
             while (true) {
                 if (majorant[channel] <= 0) {
                     break;
@@ -835,9 +834,8 @@ inline Spectrum next_event_estimation_chromatic(
                 if (t < dt) {
                     // didn't hit the surface, so this is a null-scattering event
                     p = p + t * dir_light;
-                    //p_probe = p + accum_t * shadow_ray.dir;
+                    //p = original_p + accum_t * shadow_ray.dir;
                     Spectrum sigma_t = get_sigma_a(medium, p) + get_sigma_s(medium, p);
-                    //Spectrum sigma_t = get_sigma_a(medium, p_probe) + get_sigma_s(medium, p_probe);
                     Spectrum sigma_n = majorant - sigma_t;  // density of "fake" particles
                     T_light *= exp(-majorant * t) * sigma_n / max(majorant);
                     p_trans_NEE *= exp(-majorant * t) * majorant / max(majorant);
@@ -885,7 +883,8 @@ inline Spectrum next_event_estimation_chromatic(
                 shadow_medium = update_medium(shadow_ray, vertex, shadow_medium);
             }
             //p = p + next_t * dir_light;
-            p = vertex.position + get_intersection_epsilon(scene) * shadow_ray.dir;
+            //p = vertex.position + get_intersection_epsilon(scene) * shadow_ray.dir;
+            p = vertex.position;
         }
     }
 
@@ -1014,7 +1013,6 @@ Spectrum vol_path_tracing(const Scene &scene,
                     // sample from real/fake particle events
                     p = ray.org + accum_t * ray.dir;
                     Spectrum sigma_t = get_sigma_a(medium, p) + get_sigma_s(medium, p);
-                    //Spectrum sigma_t = get_sigma_a(medium, ray.org) + get_sigma_s(medium, ray.org);
                     Spectrum real_prob = sigma_t / majorant;
 
                     if (next_pcg32_real<Real>(rng) < real_prob[channel]) {
@@ -1132,7 +1130,7 @@ Spectrum vol_path_tracing(const Scene &scene,
                 }
                 current_path_throughput *= bsdf / pdf_bsdf;
 
-                //// update ray.dir
+                // update ray.dir
                 ray.dir = next_dir;
                 ray.org = vertex.position + ray.dir * get_intersection_epsilon(scene);
                 //Vector3 out_normal = dot(vertex.geometric_normal, next_dir) > 0 ? vertex.geometric_normal : -vertex.geometric_normal;
@@ -1142,7 +1140,6 @@ Spectrum vol_path_tracing(const Scene &scene,
 
                 // cache
                 nee_p_cache = ray.org;
-                //nee_p_cache = vertex.position;
                 dir_pdf = pdf_bsdf;
                 multi_trans_dir_pdf = make_const_spectrum(1);
                 multi_trans_NEE_pdf = make_const_spectrum(1);
@@ -1169,7 +1166,6 @@ Spectrum vol_path_tracing(const Scene &scene,
 
             // cache
             nee_p_cache = ray.org;
-            //nee_p_cache = vertex.position;
             dir_pdf = phase_pdf;
             multi_trans_dir_pdf = make_const_spectrum(1);
             multi_trans_NEE_pdf = make_const_spectrum(1);
