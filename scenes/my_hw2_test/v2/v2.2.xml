@@ -2,7 +2,7 @@
 
 <!-- Defaults, these can be set via the command line: -Darg=value -->
 
-	<default name="spp" value="4096"/>
+	<default name="spp" value="1024"/>
 	<default name="resx" value="480"/>
 	<default name="resy" value="270"/>
 
@@ -11,9 +11,9 @@
 		<!-- <rgb name="sigmaA" value="0.4 0.3 0.01"/>
 		<rgb name="sigmaS" value="1.0 1.0 1.0"/>
 		<float name="scale" value="0.25"/> -->
-		<rgb name="sigmaA" value="0.15 0.15 0.4"/>
+		<rgb name="sigmaA" value="0.15 0.25 0.15"/>
 		<rgb name="sigmaS" value="1.0 1.0 1.0"/>
-		<float name="scale" value="0.33"/>
+		<float name="scale" value="0.15"/>
 	</medium>
 
 <!-- Camera and Rendering Parameters -->
@@ -47,7 +47,7 @@
 			<integer name="width" value="$resx"/>
 			<integer name="height" value="$resy"/>
 		</film>
-		<!-- <ref id="medium"/> -->
+		<ref id="medium"/>
 		<!-- <ref name="medium" id="smoke"/> -->
 	</sensor>
 

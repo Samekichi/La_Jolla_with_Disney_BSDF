@@ -11,10 +11,30 @@
 		<!-- <rgb name="sigmaA" value="0.4 0.3 0.01"/>
 		<rgb name="sigmaS" value="1.0 1.0 1.0"/>
 		<float name="scale" value="0.25"/> -->
-		<rgb name="sigmaA" value="0.15 0.15 0.4"/>
+		<rgb name="sigmaA" value="0.15 0.25 0.15"/>
 		<rgb name="sigmaS" value="1.0 1.0 1.0"/>
-		<float name="scale" value="0.33"/>
+		<float name="scale" value="0.05"/>
 	</medium>
+	
+	<medium type="homogeneous" id="ice_interior">
+		<!-- <rgb name="sigmaA" value="0.4 0.3 0.01"/>
+		<rgb name="sigmaS" value="1.0 1.0 1.0"/>
+		<float name="scale" value="0.25"/> -->
+		<rgb name="sigmaA" value="0.1 0.1 0.075"/>
+		<rgb name="sigmaS" value="1.0 1.0 1.0"/>
+		<float name="scale" value="0.3"/>
+	</medium>
+	
+	<medium type="homogeneous" id="ice_cream_ball">
+		<!-- <rgb name="sigmaA" value="0.4 0.3 0.01"/>
+		<rgb name="sigmaS" value="1.0 1.0 1.0"/>
+		<float name="scale" value="0.25"/> -->
+		<rgb name="sigmaA" value="0.25 0.25 0.25"/>
+		<rgb name="sigmaS" value="0.8 0.8 0.8"/>
+		<float name="scale" value="0.3"/>
+	</medium>
+
+
 
 <!-- Camera and Rendering Parameters -->
 
@@ -47,7 +67,7 @@
 			<integer name="width" value="$resx"/>
 			<integer name="height" value="$resy"/>
 		</film>
-		<!-- <ref id="medium"/> -->
+		<ref id="medium"/>
 		<!-- <ref name="medium" id="smoke"/> -->
 	</sensor>
 
@@ -175,7 +195,8 @@
 	<shape type="ply" id="elm__3" name="elm__3">
 		<string name="filename" value="meshes/Ice_Cream.ply"/>
 		<boolean name="face_normals" value="true"/>
-		<ref id="mat-Ice Cream" name="bsdf"/>
+		<!-- <ref id="mat-Ice Cream" name="bsdf"/> -->
+		<ref name="interior" id="ice_cream_ball"/>
 		<ref name="exterior" id="medium"/>
 	</shape>
 	<shape type="ply" id="elm__5" name="elm__5">
@@ -205,15 +226,16 @@
 	<shape type="ply" id="elm__14" name="elm__14">
 		<string name="filename" value="meshes/Sphere.ply"/>
 		<boolean name="face_normals" value="true"/>
-		<ref id="mat-Ice Cream" name="bsdf"/>
+		<!-- <ref id="mat-Ice Cream" name="bsdf"/> -->
+		<ref name="interior" id="ice_cream_ball"/>
 		<ref name="exterior" id="medium"/>
 	</shape>
 	<shape type="ply" id="elm__17" name="elm__17">
 		<string name="filename" value="meshes/Cube-Ice.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Ice" name="bsdf"/>
-		<!-- mediumd Ice cube -->
-		<!-- <ref name="interior" id="medium"/> -->
+		<!-- medium Ice cube -->
+		<ref name="interior" id="ice_interior"/>
 		<ref name="exterior" id="medium"/>
 	</shape>
 	<shape type="ply" id="elm__18" name="elm__18">
