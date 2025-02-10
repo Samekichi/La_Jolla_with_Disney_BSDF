@@ -6,6 +6,16 @@
 	<default name="resx" value="480"/>
 	<default name="resy" value="270"/>
 
+<!-- Mediuim  -->
+	<medium type="homogeneous" id="medium">
+		<!-- <rgb name="sigmaA" value="0.4 0.3 0.01"/>
+		<rgb name="sigmaS" value="1.0 1.0 1.0"/>
+		<float name="scale" value="0.25"/> -->
+		<rgb name="sigmaA" value="0.15 0.25 0.15"/>
+		<rgb name="sigmaS" value="1.0 1.0 1.0"/>
+		<float name="scale" value="0.33"/>
+	</medium>
+
 <!-- Camera and Rendering Parameters -->
 
 	<!-- <integrator type="path" id="elm__0" name="elm__0">
@@ -38,18 +48,8 @@
 			<integer name="height" value="$resy"/>
 		</film>
 		<ref id="medium"/>
+		<!-- <ref name="medium" id="smoke"/> -->
 	</sensor>
-
-<!-- Mediuim  -->
-	<medium type="homogeneous" id="smoke">
-		<!-- <rgb name="sigmaA" value="0.4 0.3 0.01"/>
-		<rgb name="sigmaS" value="1.0 1.0 1.0"/>
-		<float name="scale" value="0.25"/> -->
-		<rgb name="sigmaA" value="0.15 0.15 0.4"/>
-		<rgb name="sigmaS" value="1.0 1.0 1.0"/>
-		<float name="scale" value="0.33"/>
-	</medium>
-
 
 <!-- Materials -->
 
@@ -156,6 +156,7 @@
 			<rgb value="27.396307 63.336361 69.444443" name="radiance"/>
 		</emitter>
 		<bsdf type="null" name="bsdf"/>
+		<ref name="exterior" id="medium"/>
 	</shape>
 	<shape type="rectangle" id="elm__9" name="elm__9">
 		<boolean name="flip_normals" value="true"/>
@@ -166,6 +167,7 @@
 			<rgb value="12.712272 3.588718 6.171194" name="radiance"/>
 		</emitter>
 		<bsdf type="null" name="bsdf"/>
+		<ref name="exterior" id="medium"/>
 	</shape>
 
 <!-- Shapes -->
@@ -174,43 +176,51 @@
 		<string name="filename" value="meshes/Ice_Cream.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Ice Cream" name="bsdf"/>
+		<ref name="exterior" id="medium"/>
 	</shape>
 	<shape type="ply" id="elm__5" name="elm__5">
 		<string name="filename" value="meshes/Floor.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Matte Mirror" name="bsdf"/>
+		<ref name="exterior" id="medium"/>
 	</shape>
 	<shape type="ply" id="elm__7" name="elm__7">
 		<string name="filename" value="meshes/Donut.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Donut" name="bsdf"/>
+		<ref name="exterior" id="medium"/>
 	</shape>
 	<shape type="ply" id="elm__11" name="elm__11">
 		<string name="filename" value="meshes/Cone.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Cone" name="bsdf"/>
+		<ref name="exterior" id="medium"/>
 	</shape>
 	<shape type="ply" id="elm__13" name="elm__13">
 		<string name="filename" value="meshes/Cream.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Cream" name="bsdf"/>
+		<ref name="exterior" id="medium"/>
 	</shape>
 	<shape type="ply" id="elm__14" name="elm__14">
 		<string name="filename" value="meshes/Sphere.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Ice Cream" name="bsdf"/>
+		<ref name="exterior" id="medium"/>
 	</shape>
 	<shape type="ply" id="elm__17" name="elm__17">
 		<string name="filename" value="meshes/Cube-Ice.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Ice" name="bsdf"/>
-		<!-- Smoked Ice cube -->
-		<ref name="interior" id="medium"/>
+		<!-- mediumd Ice cube -->
+		<!-- <ref name="interior" id="medium"/> -->
+		<ref name="exterior" id="medium"/>
 	</shape>
 	<shape type="ply" id="elm__18" name="elm__18">
 		<string name="filename" value="meshes/Cube-Melt Water.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Melt Water" name="bsdf"/>
+		<ref name="exterior" id="medium"/>
 	</shape>
 
 <!-- Volumes -->
