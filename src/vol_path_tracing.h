@@ -1025,7 +1025,6 @@ Spectrum vol_path_tracing(const Scene &scene,
                         break;
                     }
                     else {
-                        assert(false);
                         // hit a "fake" particle
                         Spectrum sigma_n = majorant - sigma_t;  // density of "fake" particles
                         transmittance *= exp(-majorant * t) * sigma_n / max(majorant);
@@ -1084,7 +1083,6 @@ Spectrum vol_path_tracing(const Scene &scene,
 
         // Hit non-emission surface (index-matching surface / solid surface)
         if (!scatter && vertex_) {
-            assert(false);
             const int mat_id = vertex.material_id;
             // Case 1: Hit index-matching surface (volume boundaries)
             // - update current_medium & continue to next iteration
@@ -1149,7 +1147,6 @@ Spectrum vol_path_tracing(const Scene &scene,
 
         // Hit volume: NEE & sample next direction
         if (scatter) {
-            assert(false);
             Spectrum sigma_s = get_sigma_s(scene.media[current_medium], ray.org);
             // NEE (contribution already weighted by w)
             Spectrum nee_contrib = next_event_estimation_chromatic(vertex, ray, true, current_medium, -1, bounces, scene, rng);
@@ -1181,7 +1178,6 @@ Spectrum vol_path_tracing(const Scene &scene,
                 break;
             }
             else {
-                assert(false);
                 current_path_throughput /= rr_prob;
             }
         }
