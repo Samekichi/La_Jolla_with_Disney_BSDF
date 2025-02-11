@@ -110,7 +110,7 @@ Spectrum vol_path_tracing_2(const Scene &scene,
             pdf_point_on_light(light, point_on_light, p, scene);  // P(sample the light) * P(sample the point on the light)
         // i. compute phase function
         Vector3 dir_light = normalize(point_on_light.position - p);
-        Spectrum phase = eval(get_phase_function(scene.media[scene.camera.medium_id]), camera_ray.dir, dir_light);
+        Spectrum phase = eval(get_phase_function(scene.media[scene.camera.medium_id]), -camera_ray.dir, dir_light);
         // ii. compute Le at light
         Spectrum Le = emission(light, -dir_light, ray_diff.spread, point_on_light, scene);
         // *. visible check
@@ -356,14 +356,14 @@ Spectrum vol_path_tracing_3(const Scene &scene,
         // Sample next direction
         if (scatter) { 
             // sample next iter's direction based on phase_function
-            Vector3 next_dir = sample_phase_function(get_phase_function(scene.media[current_medium]), ray.dir, Vector2{ next_pcg32_real<Real>(rng), next_pcg32_real<Real>(rng) }).value_or(Vector3(0, 0, 0));
+            Vector3 next_dir = sample_phase_function(get_phase_function(scene.media[current_medium]), -ray.dir, Vector2{ next_pcg32_real<Real>(rng), next_pcg32_real<Real>(rng) }).value_or(Vector3(0, 0, 0));
             PhaseFunction phase = get_phase_function(scene.media[current_medium]);
             Spectrum sigma_s = get_sigma_s(scene.media[current_medium], ray.org);
 
             //Spectrum nee_contrib = next_event_estimation(vertex, ray, true, current_medium, -1, bounces, scene, rng);
             //radiance += current_path_throughput * nee_contrib * sigma_s;
             //break;
-            current_path_throughput *= eval(phase, ray.dir, next_dir) / pdf_sample_phase(phase, ray.dir, next_dir) * sigma_s;
+            current_path_throughput *= eval(phase, -ray.dir, next_dir) / pdf_sample_phase(phase, -ray.dir, next_dir) * sigma_s;
             // update ray.dir
             ray.dir = next_dir;
         }
@@ -510,10 +510,10 @@ Spectrum vol_path_tracing_4(const Scene &scene,
             radiance += current_path_throughput * nee_contrib * sigma_s;
 
             // sample next iter's direction based on phase_function
-            Vector3 next_dir = sample_phase_function(get_phase_function(scene.media[current_medium]), ray.dir, Vector2{ next_pcg32_real<Real>(rng), next_pcg32_real<Real>(rng) }).value_or(Vector3(0, 0, 0));
+            Vector3 next_dir = sample_phase_function(get_phase_function(scene.media[current_medium]), -ray.dir, Vector2{ next_pcg32_real<Real>(rng), next_pcg32_real<Real>(rng) }).value_or(Vector3(0, 0, 0));
             PhaseFunction phase_f = get_phase_function(scene.media[current_medium]);
-            Real phase_pdf = pdf_sample_phase(phase_f, ray.dir, next_dir);
-            Spectrum phase = eval(phase_f, ray.dir, next_dir);
+            Real phase_pdf = pdf_sample_phase(phase_f, -ray.dir, next_dir);
+            Spectrum phase = eval(phase_f, -ray.dir, next_dir);
             current_path_throughput *= phase / phase_pdf * sigma_s;
             // update ray.dir
             ray.dir = next_dir;
